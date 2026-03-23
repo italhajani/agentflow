@@ -104,7 +104,7 @@ const EXAMPLE_TASKS = {
   content_writer:  ['Write a blog post about standing desks', 'Create 5 Instagram captions for a coffee shop'],
   customer_support:['Handle a refund request for a damaged item', 'What is the cancellation policy?'],
   data_analyst:    ['Analyse this data: sales grew 12% in Q1 but fell 3% in Q2', 'Calculate churn rate: 500 customers, 40 left'],
-  email_assistant: ['Draft a follow-up to a client who hasn't replied', 'Write a cold outreach email for a SaaS tool'],
+  email_assistant: ["Draft a follow-up to a client who hasn't replied", "Write a cold outreach email for a SaaS tool"],
 }
 
 export default function RunTaskPage() {
