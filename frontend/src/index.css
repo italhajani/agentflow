@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #f8f9fb;
+    color: #111827;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-gray-100 rounded-xl shadow-sm;
+  }
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-700 text-white font-medium px-4 py-2 rounded-lg
+           transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-lg
+           border border-gray-200 transition-colors;
+  }
+  .btn-ghost {
+    @apply hover:bg-gray-100 text-gray-600 font-medium px-3 py-2 rounded-lg transition-colors;
+  }
+  .input {
+    @apply w-full px-3 py-2 border border-gray-200 rounded-lg text-sm
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent
+           placeholder:text-gray-400 bg-white;
+  }
+  .label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-green  { @apply badge bg-green-50 text-green-700; }
+  .badge-red    { @apply badge bg-red-50 text-red-700; }
+  .badge-yellow { @apply badge bg-yellow-50 text-yellow-700; }
+  .badge-blue   { @apply badge bg-blue-50 text-blue-700; }
+  .badge-gray   { @apply badge bg-gray-100 text-gray-600; }
+  .badge-brand  { @apply badge bg-brand-50 text-brand-700; }
+}
+
+/* Spinning loader */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  border: 2px solid #e5e7eb;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* Typing dots for "agent thinking" */
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+  40%            { transform: scale(1);   opacity: 1;   }
+}
+.dot-1 { animation: bounce-dot 1.4s ease-in-out 0s   infinite; }
+.dot-2 { animation: bounce-dot 1.4s ease-in-out 0.2s infinite; }
+.dot-3 { animation: bounce-dot 1.4s ease-in-out 0.4s infinite; }
+
+/* Fade-in page transition */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.page-enter { animation: fadeIn 0.2s ease-out; }
