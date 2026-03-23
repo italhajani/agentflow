@@ -13,7 +13,6 @@ langchain==0.3.28
 langchain-community==0.3.27
 langchain-core==0.3.83
 langchain-groq==0.3.8
-langchain-classic==1.0.3
 duckduckgo-search==6.3.0
 requests==2.32.3
 aiofiles==24.1.0

@@ -16,12 +16,8 @@ def get_llm(agent: Agent):
             max_tokens=agent.max_tokens,
             api_key=settings.GROQ_API_KEY,
         )
-    elif agent.model_provider == ModelProvider.ollama:
-        from langchain_community.llms import Ollama
-        return Ollama(model=agent.model_name or "llama3", temperature=agent.temperature)
     else:
-        # Default to groq if provider not supported yet
-        raise ValueError(f"Provider '{agent.model_provider}' not configured. Use 'groq'.")
+        raise ValueError(f"Provider '{agent.model_provider}' not supported yet. Use 'groq'.")
 
 
 def build_tools(tool_ids: list) -> list:
@@ -49,7 +45,11 @@ class AgentRunner:
             llm = get_llm(self.agent)
             tools = build_tools(self.agent.tools or [])
 
-            system_prompt = f"You are {self.agent.name}.\nRole: {self.agent.role}\nGoal: {self.agent.goal}\n"
+            system_prompt = (
+                f"You are {self.agent.name}.\n"
+                f"Role: {self.agent.role}\n"
+                f"Goal: {self.agent.goal}\n"
+            )
             if self.agent.backstory:
                 system_prompt += f"Background: {self.agent.backstory}\n"
             if self.agent.instructions:
@@ -58,7 +58,7 @@ class AgentRunner:
                 system_prompt += f"\nContext:\n{json.dumps(context, indent=2)}\n"
 
             if tools:
-                from langchain_classic.agents import create_react_agent, AgentExecutor
+                from langchain.agents import create_react_agent, AgentExecutor
                 from langchain_core.prompts import PromptTemplate
                 react_prompt = PromptTemplate.from_template(
                     system_prompt +
