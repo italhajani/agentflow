@@ -38,25 +38,9 @@ app = FastAPI(
 
 from fastapi.middleware.cors import CORSMiddleware
 
-origins = [
-    "http://localhost:5173",
-    "https://agentflow-henna.vercel.app",
-    "https://agentflow-bep2lanxl-italhajanis-projects.vercel.app",
-    "*"  # TEMP (for debugging, remove later)
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ── CORS ──────────────────────────────────────────────────────────────────────
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"],
+    allow_origins=["*"],  # TEMP: allow all (we'll restrict later)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
