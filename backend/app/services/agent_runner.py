@@ -99,76 +99,9 @@ class AgentRunner:
     def __init__(self, agent: Agent):
         self.agent = agent
 
-    def run(self, task_input: str, context: Optional[dict] = None) -> dict:
-        """
-        Synchronous run — suitable for background task execution.
-        Returns a dict with status, result, steps, tokens_used, duration_ms.
-        """
-        start_time = time.time()
-        steps = []
-
-        try:
-            llm   = get_llm(self.agent)
-            tools = build_tools(self.agent.tools or [])
-
-            # Build the CrewAI agent
-            from crewai import Agent as CrewAgent, Task, Crew
-
-            crew_agent = CrewAgent(
-                role=self.agent.role,
-                goal=self.agent.goal,
-                backstory=self.agent.backstory or f"You are {self.agent.name}, an AI assistant.",
-                llm=llm,
-                tools=tools,
-                verbose=True,
-                allow_delegation=False,
-                max_iter=5,
-            )
-
-            # Build the task
-            full_task_desc = task_input
-            if context:
-                full_task_desc += f"\n\nAdditional context:\n{json.dumps(context, indent=2)}"
-            if self.agent.instructions:
-                full_task_desc += f"\n\nSpecial instructions:\n{self.agent.instructions}"
-
-            crew_task = Task(
-                description=full_task_desc,
-                agent=crew_agent,
-                expected_output="A clear, helpful, well-formatted response.",
-            )
-
-            crew = Crew(
-                agents=[crew_agent],
-                tasks=[crew_task],
-                verbose=True,
-            )
-
-            # Run it
-            result = crew.kickoff()
-            result_text = str(result)
-
-            duration_ms = int((time.time() - start_time) * 1000)
-
-            return {
-                "status":      TaskRunStatus.completed,
-                "result":      result_text,
-                "steps":       steps,
-                "tokens_used": 0,   # CrewAI doesn't expose this easily yet
-                "duration_ms": duration_ms,
-                "error":       None,
-            }
-
-        except Exception as e:
-            duration_ms = int((time.time() - start_time) * 1000)
-            return {
-                "status":      TaskRunStatus.failed,
-                "result":      None,
-                "steps":       steps,
-                "tokens_used": 0,
-                "duration_ms": duration_ms,
-                "error":       str(e),
-            }
+    # def run(self, task_input: str, context=None) -> dict:
+    # # Just delegate to run_simple — same result, no crewai dependency needed
+    #     return self.run_simple(task_input, context)
 
     def run_simple(self, task_input: str, context: Optional[dict] = None) -> dict:
         """
@@ -193,7 +126,7 @@ class AgentRunner:
                 system_prompt += f"\nInstructions:\n{self.agent.instructions}\n"
 
             if tools:
-                from langchain.agents import create_react_agent, AgentExecutor
+                from langchain_classic.agents import create_react_agent, AgentExecutor
                 from langchain_core.prompts import PromptTemplate
 
                 react_prompt = PromptTemplate.from_template(
