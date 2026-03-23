@@ -44,7 +44,7 @@ def get_llm(agent: Agent):
     elif agent.model_provider == ModelProvider.huggingface:
         if not settings.HUGGINGFACE_API_KEY:
             raise ValueError("HUGGINGFACE_API_KEY not set.")
-        from langchain_community.llms import HuggingFaceEndpoint
+        from langchain_huggingface import HuggingFaceEndpoint
         return HuggingFaceEndpoint(
             repo_id=agent.model_name or "mistralai/Mixtral-8x7B-Instruct-v0.1",
             temperature=agent.temperature,
@@ -64,7 +64,7 @@ def get_llm(agent: Agent):
         )
 
     elif agent.model_provider == ModelProvider.ollama:
-        from langchain_community.llms import Ollama
+        from langchain_classic.llms import Ollama
         return Ollama(
             model=agent.model_name or "llama3",
             temperature=agent.temperature,
