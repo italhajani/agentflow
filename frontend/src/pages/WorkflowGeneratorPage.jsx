@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
-import { api } from '../lib/api'
+import api from '../lib/api'
 import { Sparkles, Send, Loader2, ChevronLeft, Bot, Zap } from 'lucide-react'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
