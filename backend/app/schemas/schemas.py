@@ -15,7 +15,7 @@ import re
 class UserRegister(BaseModel):
     email: EmailStr
     username: str = Field(min_length=3, max_length=30)
-    password: str = Field(min_length=8, max_length=100)
+    password: str = Field(..., min_length=6, max_length=72)
     full_name: Optional[str] = Field(None, max_length=100)
 
     @field_validator("username")
