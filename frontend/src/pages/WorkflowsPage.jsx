@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Play, History, Trash2, ChevronRight, Clock, Bot } from 'lucide-react'
+import { Plus, Play, History, Trash2, ChevronRight, Clock, Bot, Sparkles } from 'lucide-react'  // 👈 ADDED Sparkles
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
+import api from '../lib/api'  // 👈 ADDED: import api
 
-// You'll add this to api.js later
+// workflowsApi using the imported api
 const workflowsApi = {
   list: () => api.get('/workflows/').then(r => r.data),
   delete: (id) => api.delete(`/workflows/${id}`),
@@ -45,21 +46,6 @@ function WorkflowCard({ workflow, onRun, onDelete }) {
       {workflow.description && (
         <p className="text-sm text-gray-500 mb-3 line-clamp-2">{workflow.description}</p>
       )}
-
-      <div className="flex gap-2">
-        <button 
-          onClick={() => navigate('/workflows/generate')}
-          className="btn-secondary flex items-center gap-2"
-        >
-          <Sparkles size={16} /> AI Generate
-        </button>
-        <button 
-          onClick={() => navigate('/workflows/new')}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus size={16} /> New Workflow
-        </button>
-      </div>
       
       <div className="flex flex-wrap gap-2 mb-3">
         <span className="badge-gray text-xs">
@@ -137,12 +123,20 @@ export default function WorkflowsPage() {
             Multi-step AI automations — chain multiple agents together
           </p>
         </div>
-        <button 
-          onClick={() => navigate('/workflows/new')}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus size={16} /> New Workflow
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => navigate('/workflows/generate')}
+            className="btn-secondary flex items-center gap-2"
+          >
+            <Sparkles size={16} /> AI Generate
+          </button>
+          <button 
+            onClick={() => navigate('/workflows/new')}
+            className="btn-primary flex items-center gap-2"
+          >
+            <Plus size={16} /> New Workflow
+          </button>
+        </div>
       </div>
       
       {isLoading ? (
@@ -160,12 +154,20 @@ export default function WorkflowsPage() {
           <p className="text-gray-500 text-sm mb-6 max-w-sm">
             Create multi-step automations by chaining agents together.
           </p>
-          <button 
-            onClick={() => navigate('/workflows/new')}
-            className="btn-primary flex items-center gap-2"
-          >
-            <Plus size={16} /> Create your first workflow
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => navigate('/workflows/generate')}
+              className="btn-secondary flex items-center gap-2"
+            >
+              <Sparkles size={16} /> AI Generate
+            </button>
+            <button 
+              onClick={() => navigate('/workflows/new')}
+              className="btn-primary flex items-center gap-2"
+            >
+              <Plus size={16} /> Create your first workflow
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
