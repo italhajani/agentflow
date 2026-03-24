@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Bot, Plus, Layers, LogOut,
-  ChevronRight, Zap, Settings, Menu, X
+  ChevronRight, Zap, Settings, Menu, X, Workflow
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
@@ -11,6 +11,7 @@ import clsx from 'clsx'
 const NAV = [
   { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/agents',     icon: Bot,             label: 'My Agents' },
+  { to: '/workflows',  icon: Workflow,        label: 'Workflows' },
   { to: '/templates',  icon: Layers,          label: 'Templates' },
 ]
 
