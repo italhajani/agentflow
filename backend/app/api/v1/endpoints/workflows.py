@@ -14,6 +14,8 @@ from app.schemas.schemas import (
     WorkflowRunCreate, WorkflowExecutionResponse
 )
 from app.services.agent_runner import AgentRunner
+from app.services.workflow_planner import WorkflowPlanner
+from app.services.agent_creator import AgentCreator
 
 router = APIRouter(prefix="/workflows", tags=["workflows"])
 
@@ -114,6 +116,78 @@ async def _execute_workflow(execution_id: int, workflow_id: int, user_id: int, i
         )
         await db.commit()
 
+@router.post("/generate-from-description")
+async def generate_workflow_from_description(
+    payload: dict,  # {"description": "user's task description"}
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    AI-powered workflow generator: takes user description,
+    plans the workflow, and creates any missing agents.
+    """
+    description = payload.get("description", "")
+    if not description:
+        raise HTTPException(status_code=400, detail="Description required")
+    
+    # Get user's existing agents
+    agents_result = await db.execute(
+        select(Agent).where(Agent.owner_id == current_user.id, Agent.status == "active")
+    )
+    existing_agents = [
+        {"id": a.id, "name": a.name, "role": a.role}
+        for a in agents_result.scalars().all()
+    ]
+    
+    # Step 1: AI plans the workflow
+    planner = WorkflowPlanner()
+    plan = planner.plan_workflow(description, existing_agents)
+    
+    # Step 2: Create any missing agents on the fly
+    agent_creator = AgentCreator(db, current_user.id)
+    final_steps = []
+    
+    for step in plan.get("steps", []):
+        if step.get("type") == "create_agent":
+            # Create the agent now
+            agent = await agent_creator.create_agent_from_spec(step.get("agent_to_create", {}))
+            step["agent_id"] = agent.id
+            step["type"] = "use_agent"
+            del step["agent_to_create"]
+        
+        final_steps.append(step)
+    
+    # Step 3: Create the workflow in database
+    workflow = Workflow(
+        user_id=current_user.id,
+        name=plan.get("name", "AI-Generated Workflow"),
+        description=plan.get("description", description[:500]),
+        schedule_type="manual",  # Start manual, let user edit
+        status="active",
+    )
+    db.add(workflow)
+    await db.flush()
+    
+    # Add workflow steps
+    for step_data in final_steps:
+        workflow_step = WorkflowStep(
+            workflow_id=workflow.id,
+            step_order=step_data["step_order"],
+            agent_id=step_data.get("agent_id"),
+            input_mapping={"task": "{{previous.result}}" if step_data.get("depends_on") else None},
+            custom_instructions=step_data.get("description", ""),
+        )
+        db.add(workflow_step)
+    
+    await db.flush()
+    await db.refresh(workflow)
+    
+    return {
+        "workflow_id": workflow.id,
+        "workflow": workflow,
+        "plan": plan,
+        "message": f"Workflow generated with {len(final_steps)} steps. {len([s for s in final_steps if s.get('type') == 'create_agent'])} new agents created."
+    }
 
 # ── Create workflow ───────────────────────────────────────────────────────────
 @router.post("/", response_model=WorkflowResponse, status_code=201)

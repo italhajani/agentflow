@@ -17,6 +17,7 @@ import HistoryPage     from './pages/HistoryPage'
 import TemplatesPage   from './pages/TemplatesPage'
 import WorkflowsPage from './pages/WorkflowsPage'
 import CreateWorkflowPage from './pages/CreateWorkflowPage'
+import WorkflowGeneratorPage from './pages/WorkflowGeneratorPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +64,7 @@ export default function App() {
             <Route path="agents/:agentId/history"              element={<HistoryPage />} />
             <Route path="workflows" element={<WorkflowsPage />} />
             <Route path="workflows/new" element={<CreateWorkflowPage />} />
+            <Route path="/workflows/generate" element={<Protected><WorkflowGeneratorPage /></Protected>} />
           </Route>
 
           {/* Catch-all */}

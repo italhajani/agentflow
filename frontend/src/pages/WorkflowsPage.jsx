@@ -45,6 +45,21 @@ function WorkflowCard({ workflow, onRun, onDelete }) {
       {workflow.description && (
         <p className="text-sm text-gray-500 mb-3 line-clamp-2">{workflow.description}</p>
       )}
+
+      <div className="flex gap-2">
+        <button 
+          onClick={() => navigate('/workflows/generate')}
+          className="btn-secondary flex items-center gap-2"
+        >
+          <Sparkles size={16} /> AI Generate
+        </button>
+        <button 
+          onClick={() => navigate('/workflows/new')}
+          className="btn-primary flex items-center gap-2"
+        >
+          <Plus size={16} /> New Workflow
+        </button>
+      </div>
       
       <div className="flex flex-wrap gap-2 mb-3">
         <span className="badge-gray text-xs">
