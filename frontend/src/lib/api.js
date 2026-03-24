@@ -105,6 +105,17 @@ export const templatesApi = {
   clone: (id) => api.post(`/templates/${id}/clone`),
 }
 
+// ── Workflows ─────────────────────────────────────────────────────────────────
+export const workflowsApi = {
+  list:   ()      => api.get('/workflows/'),
+  get:    (id)    => api.get(`/workflows/${id}`),
+  create: (data)  => api.post('/workflows/', data),
+  update: (id, d) => api.patch(`/workflows/${id}`, d),
+  delete: (id)    => api.delete(`/workflows/${id}`),
+  run:    (id, d) => api.post(`/workflows/${id}/run`, d),
+  executions: (id, params) => api.get(`/workflows/${id}/executions`, { params }),
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export const dashboardApi = {
   get: () => api.get('/dashboard/'),

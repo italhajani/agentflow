@@ -15,6 +15,8 @@ import AgentDetailPage from './pages/AgentDetailPage'
 import RunTaskPage     from './pages/RunTaskPage'
 import HistoryPage     from './pages/HistoryPage'
 import TemplatesPage   from './pages/TemplatesPage'
+import WorkflowsPage from './pages/WorkflowsPage'
+import CreateWorkflowPage from './pages/CreateWorkflowPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +61,8 @@ export default function App() {
             <Route path="agents/:agentId"                      element={<AgentDetailPage />} />
             <Route path="agents/:agentId/run"                  element={<RunTaskPage />} />
             <Route path="agents/:agentId/history"              element={<HistoryPage />} />
+            <Route path="workflows" element={<WorkflowsPage />} />
+            <Route path="workflows/new" element={<CreateWorkflowPage />} />
           </Route>
 
           {/* Catch-all */}
