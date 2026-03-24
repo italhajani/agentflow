@@ -178,5 +178,88 @@ class TaskRun(Base):
         Index("ix_task_runs_user_created", "user_id", "created_at"),
     )
 
+
+
+    # ── Workflow ──────────────────────────────────────────────────────────────────
+class WorkflowStatus(str, enum.Enum):
+    active   = "active"
+    paused   = "paused"
+    archived = "archived"
+
+
+class Workflow(Base):
+    """A multi-step automated workflow"""
+    __tablename__ = "workflows"
+
+    id            = Column(Integer, primary_key=True, index=True)
+    user_id       = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    name          = Column(String(200), nullable=False)
+    description   = Column(Text, nullable=True)
+    
+    # Scheduling (cron or interval)
+    schedule_type = Column(String(20), default="manual")  # manual, daily, weekly, cron
+    schedule_value = Column(String(100), nullable=True)    # "09:00" or "0 9 * * *"
+    
+    status        = Column(SAEnum(WorkflowStatus), default=WorkflowStatus.active, nullable=False)
+    total_runs    = Column(Integer, default=0)
+    last_run_at   = Column(DateTime(timezone=True), nullable=True)
+    
+    created_at    = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    updated_at    = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    
+    # Relations
+    user          = relationship("User")
+    steps         = relationship("WorkflowStep", back_populates="workflow", cascade="all, delete-orphan")
+    executions    = relationship("WorkflowExecution", back_populates="workflow", cascade="all, delete-orphan")
+
+
+class WorkflowStep(Base):
+    """One step in a workflow - uses an agent"""
+    __tablename__ = "workflow_steps"
+
+    id            = Column(Integer, primary_key=True, index=True)
+    workflow_id   = Column(Integer, ForeignKey("workflows.id", ondelete="CASCADE"), nullable=False, index=True)
+    step_order    = Column(Integer, nullable=False)  # 1, 2, 3...
+    agent_id      = Column(Integer, ForeignKey("agents.id", ondelete="CASCADE"), nullable=False)
+    
+    # How to pass data from previous step
+    input_mapping = Column(JSON, nullable=True)      # e.g., {"task": "{{previous.result}}"}
+    
+    # Optional override for this step
+    custom_instructions = Column(Text, nullable=True)
+    
+    created_at    = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    
+    # Relations
+    workflow      = relationship("Workflow", back_populates="steps")
+    agent         = relationship("Agent")
+
+
+class WorkflowExecution(Base):
+    """Record of a workflow run"""
+    __tablename__ = "workflow_executions"
+
+    id            = Column(Integer, primary_key=True, index=True)
+    workflow_id   = Column(Integer, ForeignKey("workflows.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id       = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    
+    status        = Column(SAEnum(TaskRunStatus), default=TaskRunStatus.queued, nullable=False)
+    input_data    = Column(JSON, nullable=True)      # Initial input for the workflow
+    step_results  = Column(JSON, default=list)       # Results from each step
+    final_result  = Column(Text, nullable=True)
+    error_message = Column(Text, nullable=True)
+    
+    started_at    = Column(DateTime(timezone=True), nullable=True)
+    completed_at  = Column(DateTime(timezone=True), nullable=True)
+    duration_ms   = Column(Integer, nullable=True)
+    
+    created_at    = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    
+    # Relations
+    workflow      = relationship("Workflow", back_populates="executions")
+    user          = relationship("User")
+
+
+
     def __repr__(self):
         return f"<TaskRun {self.id} [{self.status}]>"

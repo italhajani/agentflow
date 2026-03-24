@@ -208,6 +208,85 @@ class TemplateListResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# WORKFLOW SCHEMAS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class WorkflowStepCreate(BaseModel):
+    step_order: int
+    agent_id: int
+    input_mapping: Optional[Dict[str, Any]] = None
+    custom_instructions: Optional[str] = None
+
+
+class WorkflowStepResponse(BaseModel):
+    id: int
+    step_order: int
+    agent_id: int
+    agent_name: Optional[str] = None
+    input_mapping: Optional[Dict[str, Any]]
+    custom_instructions: Optional[str]
+
+    model_config = {"from_attributes": True}
+
+
+class WorkflowCreate(BaseModel):
+    name: str = Field(min_length=3, max_length=200)
+    description: Optional[str] = None
+    schedule_type: str = "manual"  # manual, daily, weekly, cron
+    schedule_value: Optional[str] = None
+    steps: List[WorkflowStepCreate]
+
+
+class WorkflowUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    schedule_type: Optional[str] = None
+    schedule_value: Optional[str] = None
+    status: Optional[str] = None
+    steps: Optional[List[WorkflowStepCreate]] = None
+
+
+class WorkflowResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+    schedule_type: str
+    schedule_value: Optional[str]
+    status: str
+    total_runs: int
+    last_run_at: Optional[datetime]
+    created_at: datetime
+    steps: List[WorkflowStepResponse]
+
+    model_config = {"from_attributes": True}
+
+
+class WorkflowListResponse(BaseModel):
+    workflows: List[WorkflowResponse]
+    total: int
+    page: int
+    page_size: int
+
+
+class WorkflowRunCreate(BaseModel):
+    input_data: Optional[Dict[str, Any]] = None
+
+
+class WorkflowExecutionResponse(BaseModel):
+    id: int
+    workflow_id: int
+    status: str
+    input_data: Optional[Dict]
+    step_results: List[Dict]
+    final_result: Optional[str]
+    error_message: Optional[str]
+    duration_ms: Optional[int]
+    created_at: datetime
+    completed_at: Optional[datetime]
+
+    model_config = {"from_attributes": True}
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # DASHBOARD SCHEMA
 # ═══════════════════════════════════════════════════════════════════════════════
 
