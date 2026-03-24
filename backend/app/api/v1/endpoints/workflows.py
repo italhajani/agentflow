@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, update
-from typing import Optional
+from typing import Optional, List, Dict
 import asyncio
 import time
 from datetime import datetime, timezone
