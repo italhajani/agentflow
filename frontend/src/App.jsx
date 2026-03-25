@@ -18,6 +18,7 @@ import TemplatesPage   from './pages/TemplatesPage'
 import WorkflowsPage from './pages/WorkflowsPage'
 import CreateWorkflowPage from './pages/CreateWorkflowPage'
 import WorkflowGeneratorPage from './pages/WorkflowGeneratorPage'
+import WorkflowStudioPage from './pages/WorkflowStudioPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +66,7 @@ export default function App() {
             <Route path="workflows" element={<WorkflowsPage />} />
             <Route path="workflows/new" element={<CreateWorkflowPage />} />
             <Route path="/workflows/generate" element={<Protected><WorkflowGeneratorPage /></Protected>} />
+            <Route path="workflows/studio/:workflowId?" element={<WorkflowStudioPage />} />
           </Route>
 
           {/* Catch-all */}

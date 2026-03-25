@@ -312,6 +312,7 @@ async def get_workflow(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
+    # Get workflow
     result = await db.execute(
         select(Workflow).where(Workflow.id == workflow_id, Workflow.user_id == current_user.id)
     )
@@ -319,13 +320,35 @@ async def get_workflow(
     if not workflow:
         raise HTTPException(status_code=404, detail="Workflow not found")
     
+    # Get steps separately (eager load instead of lazy)
     steps_result = await db.execute(
-        select(WorkflowStep).where(WorkflowStep.workflow_id == workflow_id)
+        select(WorkflowStep)
+        .where(WorkflowStep.workflow_id == workflow_id)
         .order_by(WorkflowStep.step_order)
     )
-    workflow.steps = steps_result.scalars().all()
+    steps = steps_result.scalars().all()
     
-    return workflow
+    # Also load agent names for each step
+    for step in steps:
+        agent_result = await db.execute(
+            select(Agent).where(Agent.id == step.agent_id)
+        )
+        agent = agent_result.scalar_one_or_none()
+        if agent:
+            step.agent_name = agent.name
+    
+    return WorkflowResponse(
+        id=workflow.id,
+        name=workflow.name,
+        description=workflow.description,
+        schedule_type=workflow.schedule_type,
+        schedule_value=workflow.schedule_value,
+        status=workflow.status,
+        total_runs=workflow.total_runs,
+        last_run_at=workflow.last_run_at,
+        created_at=workflow.created_at,
+        steps=steps
+    )
 
 
 # ── Update workflow ──────────────────────────────────────────────────────────
