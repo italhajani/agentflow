@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     FREE_TIER_DAILY_RUNS: int = 10
     MAX_TASK_TIMEOUT_SECONDS: int = 120
 
+    # Workflow generation timeout
+    WORKFLOW_GENERATION_TIMEOUT_SECONDS: int = 120
+
     class Config:
         env_file = ".env"
         case_sensitive = True

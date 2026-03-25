@@ -17,11 +17,28 @@ export default function WorkflowGeneratorPage() {
     mutationFn: (desc) => api.post('/workflows/generate-from-description', { description: desc }),
     onSuccess: (res) => {
       setMessages(prev => [...prev, 
-        { role: 'assistant', content: `✅ Workflow created!\n\n**Name:** ${res.data.workflow.name}\n**Steps:** ${res.data.workflow.steps?.length || 0} steps\n\n${res.data.message}\n\nYou can now view and edit it in your workflows.` }
+        { role: 'assistant', content: `⏳ Workflow generation started!\n\n**ID:** ${res.data.workflow_id}\n\nAI is planning your workflow in the background. This may take 30-60 seconds.\n\nRefresh the Workflows page in a moment to see your new workflow.` }
       ])
-      setTimeout(() => {
-        navigate('/workflows')
+      
+      // Poll for completion
+      const pollInterval = setInterval(async () => {
+        try {
+          const workflowRes = await api.get(`/workflows/${res.data.workflow_id}`)
+          if (workflowRes.data.name !== "Generating...") {
+            clearInterval(pollInterval)
+            setMessages(prev => [...prev, 
+              { role: 'assistant', content: `✅ Workflow ready!\n\n**Name:** ${workflowRes.data.name}\n**Steps:** ${workflowRes.data.steps?.length || 0} steps\n\n[View in Workflows](/workflows)` }
+            ])
+            toast.success('Workflow generated!')
+            setTimeout(() => navigate('/workflows'), 2000)
+          }
+        } catch (e) {
+          // Still generating
+        }
       }, 3000)
+      
+      // Stop polling after 2 minutes
+      setTimeout(() => clearInterval(pollInterval), 120000)
     },
     onError: (err) => {
       setMessages(prev => [...prev, 
