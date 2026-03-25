@@ -6,18 +6,17 @@ import { useAuthStore } from './store/authStore'
 import AppLayout from './components/layout/AppLayout'
 
 // Pages
-import LandingPage           from './pages/LandingPage'
-import LoginPage             from './pages/LoginPage'
-import RegisterPage          from './pages/RegisterPage'
-import DashboardPage         from './pages/DashboardPage'
-import AgentsPage            from './pages/AgentsPage'
-import CreateAgentPage       from './pages/CreateAgentPage'
-import AgentDetailPage       from './pages/AgentDetailPage'
-import RunTaskPage           from './pages/RunTaskPage'
-import HistoryPage           from './pages/HistoryPage'
-import TemplatesPage         from './pages/TemplatesPage'
-import WorkflowsPage         from './pages/WorkflowsPage'
-import CreateWorkflowPage    from './pages/CreateWorkflowPage'
+import LoginPage       from './pages/LoginPage'
+import RegisterPage    from './pages/RegisterPage'
+import DashboardPage   from './pages/DashboardPage'
+import AgentsPage      from './pages/AgentsPage'
+import CreateAgentPage from './pages/CreateAgentPage'
+import AgentDetailPage from './pages/AgentDetailPage'
+import RunTaskPage     from './pages/RunTaskPage'
+import HistoryPage     from './pages/HistoryPage'
+import TemplatesPage   from './pages/TemplatesPage'
+import WorkflowsPage from './pages/WorkflowsPage'
+import CreateWorkflowPage from './pages/CreateWorkflowPage'
 import WorkflowGeneratorPage from './pages/WorkflowGeneratorPage'
 
 const queryClient = new QueryClient({
@@ -26,7 +25,7 @@ const queryClient = new QueryClient({
   },
 })
 
-// ── Guards ────────────────────────────────────────────────────────────────────
+// ── Route guards ──────────────────────────────────────────────────────────────
 function Protected({ children }) {
   const user = useAuthStore((s) => s.user)
   return user ? children : <Navigate to="/login" replace />
@@ -44,44 +43,32 @@ export default function App() {
         <Toaster
           position="top-right"
           toastOptions={{
-            style: {
-              fontSize: '13px',
-              borderRadius: '12px',
-              background: '#161b27',
-              color: '#f0f4f8',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            },
-            success: { iconTheme: { primary: '#0ea5e9', secondary: '#fff' } },
-            error:   { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+            style: { fontSize: '14px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+            success: { iconTheme: { primary: '#4f46e5', secondary: '#fff' } },
           }}
         />
         <Routes>
-          {/* Public landing */}
-          <Route path="/" element={<GuestOnly><LandingPage /></GuestOnly>} />
-
-          {/* Auth */}
+          {/* Public */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login"    element={<GuestOnly><LoginPage /></GuestOnly>} />
           <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
-
-          {/* Templates — public (works logged in or out) */}
           <Route path="/templates" element={<TemplatesPage />} />
 
-          {/* Protected — inside sidebar layout */}
+          {/* Protected — wrapped in sidebar layout */}
           <Route path="/" element={<Protected><AppLayout /></Protected>}>
-            <Route path="dashboard"                  element={<DashboardPage />} />
-            <Route path="agents"                     element={<AgentsPage />} />
-            <Route path="agents/new"                 element={<CreateAgentPage />} />
-            <Route path="agents/:agentId"            element={<AgentDetailPage />} />
-            <Route path="agents/:agentId/run"        element={<RunTaskPage />} />
-            <Route path="agents/:agentId/history"    element={<HistoryPage />} />
-            <Route path="workflows"                  element={<WorkflowsPage />} />
-            <Route path="workflows/new"              element={<CreateWorkflowPage />} />
-            <Route path="workflows/generate"         element={<WorkflowGeneratorPage />} />
+            <Route path="dashboard"                            element={<DashboardPage />} />
+            <Route path="agents"                               element={<AgentsPage />} />
+            <Route path="agents/new"                           element={<CreateAgentPage />} />
+            <Route path="agents/:agentId"                      element={<AgentDetailPage />} />
+            <Route path="agents/:agentId/run"                  element={<RunTaskPage />} />
+            <Route path="agents/:agentId/history"              element={<HistoryPage />} />
+            <Route path="workflows" element={<WorkflowsPage />} />
+            <Route path="workflows/new" element={<CreateWorkflowPage />} />
+            <Route path="/workflows/generate" element={<Protected><WorkflowGeneratorPage /></Protected>} />
           </Route>
 
-          {/* Catch-all → landing or dashboard */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
