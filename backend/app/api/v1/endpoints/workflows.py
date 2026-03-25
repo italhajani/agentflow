@@ -1,5 +1,3 @@
-from urllib import response
-
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, update
@@ -118,11 +116,12 @@ async def _execute_workflow(execution_id: int, workflow_id: int, user_id: int, i
         )
         await db.commit()
 
+
 @router.post("/generate-from-description", status_code=202)
 async def generate_workflow_from_description(
     payload: dict,
     background_tasks: BackgroundTasks,
-    response: Response,  # 👈 ADD THIS
+    response: Response,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
@@ -133,7 +132,9 @@ async def generate_workflow_from_description(
     if not description:
         raise HTTPException(status_code=400, detail="Description required")
     
+    # Set CORS headers for preflight
     response.headers["Access-Control-Allow-Origin"] = "https://agentflow-henna.vercel.app"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
     
     # Create a pending workflow status
     workflow = Workflow(
@@ -154,7 +155,6 @@ async def generate_workflow_from_description(
         description,
         current_user.id,
     )
-    
     
     return {
         "workflow_id": workflow.id,
@@ -241,7 +241,6 @@ async def _generate_workflow_background(workflow_id: int, description: str, user
             workflow.name = "Failed to Generate"
             workflow.description = f"Error: {str(e)[:200]}"
             await db.commit()
-
 
 
 # ── Create workflow ───────────────────────────────────────────────────────────
@@ -352,7 +351,7 @@ async def update_workflow(
     if payload.steps is not None:
         # Delete existing steps
         await db.execute(
-            update(WorkflowStep).where(WorkflowStep.workflow_id == workflow_id).values(status="deleted")
+            delete(WorkflowStep).where(WorkflowStep.workflow_id == workflow_id)
         )
         # Add new steps
         for step_data in payload.steps:

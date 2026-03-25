@@ -4,7 +4,6 @@ Main application entry point
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
@@ -36,14 +35,18 @@ app = FastAPI(
     redoc_url="/redoc" if settings.DEBUG else None,
 )
 
-from fastapi.middleware.cors import CORSMiddleware
-
+# ── CORS Middleware (FIXED) ───────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://agentflow-henna.vercel.app", "http://localhost:5173"],  # Your Vercel URL
+    allow_origins=[
+        "https://agentflow-henna.vercel.app",
+        "http://localhost:5173",
+        "https://agentflow-henna.vercel.app/",  # Keep both for safety
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 
