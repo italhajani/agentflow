@@ -293,16 +293,60 @@ async def list_workflows(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    query = select(Workflow).where(Workflow.user_id == current_user.id)
+    # Get total count
+    total = (await db.execute(
+        select(func.count()).select_from(Workflow).where(Workflow.user_id == current_user.id)
+    )).scalar()
     
-    total = (await db.execute(select(func.count()).select_from(query.subquery()))).scalar()
-    
-    query = query.order_by(Workflow.created_at.desc())
-    query = query.offset((page - 1) * page_size).limit(page_size)
-    result = await db.execute(query)
+    # Get workflows with pagination
+    result = await db.execute(
+        select(Workflow)
+        .where(Workflow.user_id == current_user.id)
+        .order_by(Workflow.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
     workflows = result.scalars().all()
     
-    return WorkflowListResponse(workflows=workflows, total=total, page=page, page_size=page_size)
+    # For each workflow, load steps separately to avoid async issues
+    workflow_list = []
+    for workflow in workflows:
+        # Get steps for this workflow
+        steps_result = await db.execute(
+            select(WorkflowStep)
+            .where(WorkflowStep.workflow_id == workflow.id)
+            .order_by(WorkflowStep.step_order)
+        )
+        steps = steps_result.scalars().all()
+        
+        # Also load agent names for steps
+        for step in steps:
+            agent_result = await db.execute(
+                select(Agent).where(Agent.id == step.agent_id)
+            )
+            agent = agent_result.scalar_one_or_none()
+            step.agent_name = agent.name if agent else None
+        
+        # Convert to response format
+        workflow_list.append({
+            "id": workflow.id,
+            "name": workflow.name,
+            "description": workflow.description,
+            "schedule_type": workflow.schedule_type,
+            "schedule_value": workflow.schedule_value,
+            "status": workflow.status,
+            "total_runs": workflow.total_runs,
+            "last_run_at": workflow.last_run_at,
+            "created_at": workflow.created_at,
+            "steps": steps
+        })
+    
+    return WorkflowListResponse(
+        workflows=workflow_list,
+        total=total,
+        page=page,
+        page_size=page_size
+    )
 
 
 # ── Get single workflow ──────────────────────────────────────────────────────

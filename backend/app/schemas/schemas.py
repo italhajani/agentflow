@@ -246,6 +246,18 @@ class WorkflowUpdate(BaseModel):
     steps: Optional[List[WorkflowStepCreate]] = None
 
 
+class WorkflowStepResponse(BaseModel):
+    id: int
+    step_order: int
+    agent_id: int
+    agent_name: Optional[str] = None
+    input_mapping: Optional[Dict[str, Any]]
+    custom_instructions: Optional[str]
+    created_at: Optional[datetime]
+
+    model_config = {"from_attributes": True}
+
+
 class WorkflowResponse(BaseModel):
     id: int
     name: str
@@ -256,7 +268,7 @@ class WorkflowResponse(BaseModel):
     total_runs: int
     last_run_at: Optional[datetime]
     created_at: datetime
-    steps: List[WorkflowStepResponse]
+    steps: List[WorkflowStepResponse] = []  # Default empty list
 
     model_config = {"from_attributes": True}
 
