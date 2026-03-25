@@ -40,7 +40,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TEMP: allow all (we'll restrict later)
+    allow_origins=["https://agentflow-henna.vercel.app/", "http://localhost:5173"],  # Your Vercel URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

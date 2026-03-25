@@ -20,7 +20,7 @@ class WorkflowPlanner:
             raise ValueError("GROQ_API_KEY required for workflow planning")
         
         self.llm = ChatGroq(
-            model="llama3-70b-8192",  # Free, powerful
+            model="llama-3.3-70b-versatile",
             temperature=0.2,  # Low temp for structured output
             api_key=settings.GROQ_API_KEY,
         )
