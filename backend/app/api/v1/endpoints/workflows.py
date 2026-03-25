@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
+from urllib import response
+
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, update
 from typing import Optional, List, Dict
@@ -120,6 +122,7 @@ async def _execute_workflow(execution_id: int, workflow_id: int, user_id: int, i
 async def generate_workflow_from_description(
     payload: dict,
     background_tasks: BackgroundTasks,
+    response: Response,  # 👈 ADD THIS
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
@@ -129,6 +132,8 @@ async def generate_workflow_from_description(
     description = payload.get("description", "")
     if not description:
         raise HTTPException(status_code=400, detail="Description required")
+    
+    response.headers["Access-Control-Allow-Origin"] = "https://agentflow-henna.vercel.app"
     
     # Create a pending workflow status
     workflow = Workflow(
@@ -149,6 +154,7 @@ async def generate_workflow_from_description(
         description,
         current_user.id,
     )
+    
     
     return {
         "workflow_id": workflow.id,
